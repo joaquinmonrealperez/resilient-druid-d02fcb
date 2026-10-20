@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM - Global Export Market | Asesoría de Exportación con IA</title>
+    <meta name="description" content="GEM te ayuda a identificar los mejores mercados de exportación mediante IA y análisis personalizado.">
+    <link rel="stylesheet" href="styles.css?v=101">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Musica de fondo: Canon en Re mayor de Johann Pachelbel (s. 1680,
+         dominio publico). La grabaci&oacute;n base es de 44,1 kHz; se recorta a
+         22,05 kHz en un solo canal y se cierra el bucle, de forma que los
+         ultimos segundos se funden con los primeros y al repetir no se oiga
+         ni un hueco ni un chasquido. Convertida a MP3 a 112 kbps para que no
+         pese mas de lo necesario.
+         Intenta arrancar solo; si el navegador lo bloquea, arranca con la
+         primera pulsacion del visitante. -->
+    <audio id="audio-fondo" autoplay loop preload="auto" src="assets/audio/canon-bucle.mp3?v=1"></audio>
+
+    <button type="button" class="control-sonido" id="control-sonido"
+            aria-label="Silenciar sonido" title="Silenciar sonido">
+        <span class="control-sonido-icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                <line class="control-sonido-tachado" x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+        </span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <button class="hamburger" id="hamburger" type="button"
+                        aria-label="Abrir menu de navegacion" aria-expanded="false" aria-controls="nav-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="#servicios">Servicios</a></li>
+                    <li><a href="#preferencias">Tus preferencias</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                    <li class="nav-auth"><a href="#acceso" id="nav-entrar">Entrar</a></li>
+                    <li class="nav-auth"><a href="#registro" id="nav-registrarse">Registrarse</a></li>
+                    <li class="nav-sesion nav-cuenta">
+                        <button type="button" class="nav-enlace" id="nav-mi-cuenta" aria-expanded="false" aria-controls="cuenta-submenu">Mi cuenta<span class="nav-usuario" id="nav-usuario"></span></button>
+                        <ul class="cuenta-submenu" id="cuenta-submenu" hidden>
+                            <li><button type="button" data-cuenta-panel="actividad">Actividad pasada</button></li>
+                            <li><button type="button" data-cuenta-panel="suscripciones">Suscripciones y pago</button></li>
+                            <li><button type="button" data-cuenta-panel="sesion" class="cuenta-submenu-peligro">Cerrar sesi&oacute;n</button></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-marca">
+                    <div class="hero-badge">
+                        <span class="hero-badge-texto">
+                            <span class="hero-badge-nombre">GEM</span>
+                            <span class="hero-badge-descripcion">Global Export Market Intelligence</span>
+                        </span>
+                        <img src="assets/logo-diamante-transparente.png" alt="Logotipo de GEM" class="hero-logo" width="333" height="163">
+                    </div>
+                </div>
+                <p class="hero-subtitle">Mira al mundo para mejorar tu <span class="highlight">rentabilidad exportadora</span></p>
+                <p class="hero-text">¿Sabías que la mayoría de las empresas podrían obtener mayor rentabilidad exportando<br>al mercado adecuado según su producto, perfil de riesgo y recursos disponibles?</p>
+                <p class="hero-claim">No m&aacute;s decisiones internacionales basadas en intuici&oacute;n o en informes est&aacute;ticos.<br>Con GEM, <span class="claim-destacado">decisiones basadas en datos</span>, adaptadas a tu <span class="claim-destacado">realidad industrial</span></p>
+                <p class="hero-fuentes">Todos los datos proceden de fuentes fiables, oficiales y contrastadas</p>
+                <div class="hero-cta">
+                    <a href="#servicios" class="btn btn-large btn-primary">Descubre nuestros servicios</a>
+                    <a href="#contacto" class="btn btn-large btn-outline">Contactar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acceso -->
+    <section class="section acceso" id="acceso">
+        <div class="container">
+            <div class="section-header">
+                <h2>Entrar</h2>
+                <p class="section-intro">Accede con tu cuenta para ver los servicios y las herramientas de an&aacute;lisis</p>
+            </div>
+
+            <div class="auth-form auth-acceso">
+                <form id="form-acceso" novalidate>
+                    <div class="auth-campo">
+                        <label for="acceso-usuario">Usuario</label>
+                        <input type="text" id="acceso-usuario" class="form-control" autocomplete="username" placeholder="Escribe tu usuario">
+                    </div>
+                    <div class="auth-campo">
+                        <label for="acceso-password">Contrase&ntilde;a</label>
+                        <input type="password" id="acceso-password" class="form-control" autocomplete="current-password" placeholder="M&aacute;ximo 6 caracteres, 1 may&uacute;scula, 1 min&uacute;scula y 2 n&uacute;meros">
+                    </div>
+                    <div class="auth-reglas">
+                        <p>La contraseña debe tener al menos 6 caracteres e incluir una may&uacute;scula, una min&uacute;scula y dos n&uacute;meros.</p>
+                    </div>
+                    <p class="auth-error" id="acceso-error" role="alert" hidden></p>
+                    <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+                </form>
+                <p class="auth-pie">&iquest;No tienes cuenta? <a href="#registro">Reg&iacute;strate</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registro -->
+    <section class="section registro" id="registro">
+        <div class="container">
+            <div class="section-header">
+                <h2>Registrarse</h2>
+                <p class="section-intro">Crea tu cuenta para acceder a los servicios de GEM</p>
+            </div>
+
+            <div class="auth-form">
+                <fieldset class="auth-tipo">
+                    <legend>&iquest;Qu&eacute; eres?</legend>
+                    <label class="auth-radio">
+                        <input type="radio" name="tipo" value="autonomo" checked>
+                        <span>Aut&oacute;nomo</span>
+                    </label>
+                    <label class="auth-radio">
+                        <input type="radio" name="tipo" value="empresa">
+                        <span>Empresa</span>
+                    </label>
+                </fieldset>
+
+                <form id="form-registro" novalidate>
+                    <!-- Solo para empresa -->
+                    <div class="auth-solo-empresa" id="grupo-empresa" hidden>
+                        <div class="auth-campo">
+                            <label for="reg-empresa">Nombre de la empresa</label>
+                            <input type="text" id="reg-empresa" class="form-control" placeholder="Nombre o raz&oacute;n social">
+                        </div>
+                        <div class="auth-campo">
+                            <label for="reg-cargo">Cargo en la empresa</label>
+                            <select id="reg-cargo" class="form-control">
+                                <option value="">Selecciona el cargo</option>
+                                <option value="alta-direccion">Alta direcci&oacute;n</option>
+                                <option value="gerente">Gerente</option>
+                                <option value="responsable-comercial">Responsable comercial</option>
+                                <option value="responsable-exportacion">Responsable de exportaci&oacute;n</option>
+                                <option value="responsable-finanzas">Responsable financiero</option>
+                                <option value="asesor">Asesor externo</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Comunes a los dos -->
+                    <div class="auth-campo">
+                        <label for="reg-lugar">Lugar de procedencia</label>
+                        <input type="text" id="reg-lugar" class="form-control" placeholder="Ciudad y provincia">
+                    </div>
+                    <div class="auth-campo">
+                        <label for="reg-usuario">Nombre del usuario</label>
+                        <input type="text" id="reg-usuario" class="form-control" autocomplete="username" placeholder="Como quieras que te identifiquemos">
+                    </div>
+                    <div class="auth-campo">
+                        <label for="reg-email">E-mail</label>
+                        <input type="email" id="reg-email" class="form-control" autocomplete="email" placeholder="nombre@empresa.com">
+                    </div>
+                    <div class="auth-campo">
+                        <label for="reg-telefono">Tel&eacute;fono</label>
+                        <input type="tel" id="reg-telefono" class="form-control" autocomplete="tel" placeholder="+34 600 000 000">
+                    </div>
+                    <div class="auth-campo">
+                        <label for="reg-password">Contrase&ntilde;a</label>
+                        <input type="password" id="reg-password" class="form-control" autocomplete="new-password" placeholder="M&aacute;ximo 6 caracteres, 1 may&uacute;scula, 1 min&uacute;scula y 2 n&uacute;meros">
+                    </div>
+
+                    <div class="auth-reglas">
+                        <p>La contraseña debe tener al menos 6 caracteres e incluir una may&uacute;scula, una min&uacute;scula y dos n&uacute;meros.</p>
+                    </div>
+                    <p class="auth-error" id="registro-error" role="alert" hidden></p>
+                    <button type="submit" class="btn btn-primary btn-full">Crear cuenta</button>
+                </form>
+                <p class="auth-pie">&Ya tienes cuenta? <a href="#acceso">Entra</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section class="section servicios requiere-sesion" id="servicios">
+        <div class="container">
+            <div class="section-header">
+                <h2>Soluciones para tu expansión internacional</h2>
+                <p class="section-intro">Herramientas y servicios diseñados para maximizar tu éxito en mercados globales</p>
+            </div>
+            
+            <div class="cards-grid">
+                <div class="card card-featured">
+                    <div class="card-badge">Más popular</div>
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop" alt="Análisis de datos">
+                    </div>
+                    <div class="card-content">
+                        <p class="card-etiqueta">Servicio Principal</p>
+                        <h3>Exporta</h3>
+                        <p class="card-description">Tu guía inteligente para encontrar los mejores mercados</p>
+                        <div class="card-price">50€<span>/mes</span></div>
+                        <ul class="card-features">
+                            <li>Mapa interactivo con mercados coloreados según su atractivo conforme a tu perfil y capacidades exportadoras</li>
+                            <li>Atractivo basado en 17 criterios de 7 dimensiones m&aacute;s 2 cuestiones que definen tu perfil y 22 preguntas en seis bloques que definen tus capacidades exportadoras</li>
+                            <li>Informes PDF ilimitados de mercados</li>
+                            <li>Tres mercados m&aacute;s atractivos con un an&aacute;lisis de puntos fuertes y d&eacute;biles</li>
+                            <li>Probabilidad de &eacute;xito exportador</li>
+                        </ul>
+                        <a href="#preferencias" class="btn btn-primary btn-full">Probar</a>
+                    </div>
+                </div>
+
+                <div class="card card-disabled">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=250&fit=crop" alt="Toma de decisiones">
+                    </div>
+                    <div class="card-content">
+                        <p class="card-etiqueta">Servicio Extra</p>
+                        <h3>Decisi&oacute;n</h3>
+                        <p class="card-description">Apoyo a la toma de decisiones estrat&eacute;gica de exportaci&oacute;n</p>
+                        <div class="card-price">+30€<span>/mes</span></div>
+                        <ul class="card-features">
+                            <li>Orden de prioridad de entrada a los mercados</li>
+                            <li>Diferentes estrategias de entrada</li>
+                            <li>Simulaci&oacute;n de diferentes escenarios externos posibles</li>
+                            <li>&iquest;Qu&eacute; pasa cuando tu actitud y perfil cambia?</li>
+                        </ul>
+                        <a href="#" class="btn btn-disabled btn-full">No disponible</a>
+                    </div>
+                </div>
+
+                <div class="card card-disabled">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=250&fit=crop" alt="Trabajo en equipo">
+                    </div>
+                    <div class="card-content">
+                        <p class="card-etiqueta">Servicio Extra</p>
+                        <h3>&Uacute;nete</h3>
+                        <p class="card-description">Conecta con empresas que exportan a tus mismos mercados</p>
+                        <div class="card-price">+10€<span>/mes</span></div>
+                        <ul class="card-features">
+                            <li>Acceso a red de empresas similares</li>
+                            <li>Oportunidades de colaboración</li>
+                            <li>Acciones colectivas de exportación</li>
+                            <li>Ideal para pequeñas empresas</li>
+                            <li>Reduce riesgos compartiendo recursos</li>
+                        </ul>
+                        <a href="#" class="btn btn-disabled btn-full">No disponible</a>
+                    </div>
+                </div>
+
+                <div class="card card-disabled">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop" alt="Consultoría">
+                    </div>
+                    <div class="card-content">
+                        <p class="card-etiqueta">Servicio Extra</p>
+                        <h3>Consultoría</h3>
+                        <p class="card-description">Asesoramiento personalizado para tu proceso de exportación</p>
+                        <div class="card-price">Gratuito</div>
+                        <ul class="card-features">
+                            <li>Contacto con consultoría local</li>
+                            <li>Expertos en tu mercado objetivo</li>
+                            <li>Acompañamiento personalizado</li>
+                            <li>Experiencia en comercio exterior</li>
+                            <li>Sin coste adicional</li>
+                        </ul>
+                        <a href="#" class="btn btn-disabled btn-full">No disponible</a>
+                    </div>
+                </div>
+
+                <div class="card card-disabled">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=250&fit=crop" alt="Oportunidades">
+                    </div>
+                    <div class="card-content">
+                        <p class="card-etiqueta">Servicio Extra</p>
+                        <h3 class="card-h3-largo">Grandes<br>Oportunidades</h3>
+                        <p class="card-description">Descubre apoyo institucional para tus exportaciones</p>
+                        <div class="card-price">Gratuito</div>
+                        <ul class="card-features">
+                            <li>Recomendación de mercados con apoyo institucional</li>
+                            <li>Acceso a misiones comerciales</li>
+                            <li>Información sobre ferias internacionales</li>
+                            <li>Conexión con principales instituciones de promoción de exportaciones y asociaciones sectoriales</li>
+                            <li>Actualizaciones de eventos y programas</li>
+                        </ul>
+                        <a href="#" class="btn btn-disabled btn-full">No disponible</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tus Preferencias -->
+    <section class="section preferencias requiere-sesion" id="preferencias">
+        <div class="container">
+            <div class="section-header">
+                <h2>Tus preferencias</h2>
+                <p class="section-intro">Configura tus preferencias para obtener recomendaciones personalizadas</p>
+            </div>
+
+            <!-- Preguntas 1 y 2: definen el perfil de empresa -->
+            <div class="preferences-bloque preferences-bloque-perfil">
+                <h3 class="preferences-bloque-titulo">Tu perfil de empresa</h3>
+                <p class="preferences-bloque-intro">Estas dos preguntas determinan tu perfil, que es lo que cambia el peso de cada uno de los 17 criterios del an&aacute;lisis. No hay ning&uacute;n selector de perfil aparte.</p>
+
+                <div class="preferences-grid">
+                    <div class="preference-form">
+                        <h3><span class="preference-numero">Pregunta 1</span> &iquest;Cu&aacute;ntos recursos puedes dedicar a la exportaci&oacute;n?</h3>
+                        <form>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="recursos" value="pocos">
+                                    Pocos recursos
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="recursos" value="medio-altos" checked>
+                                    Recursos medio-altos
+                                </label>
+                            </div>
+                        </form>
+                        <p class="preference-pista">Persona, presupuesto y tiempo que puedes dedicar al proyecto exportador.</p>
+                    </div>
+
+                    <div class="preference-form">
+                        <h3><span class="preference-numero">Pregunta 2</span> &iquest;Cu&aacute;l es tu orientaci&oacute;n al riesgo?</h3>
+                        <form>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="riesgo" value="medio-alto" checked>
+                                    Riesgo medio-alto
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="riesgo" value="conservador">
+                                    Conservador
+                                </label>
+                            </div>
+                        </form>
+                        <p class="preference-pista">Cu&aacute;nto est&aacute;s dispuesto a arriesgar en un mercado nuevo.</p>
+                    </div>
+                </div>
+
+                <p class="preferences-perfil-resultado" id="perfil-resultado">Perfil detectado: <strong id="perfil-resultado-valor">A</strong></p>
+            </div>
+
+            <!-- Preguntas demograficas: quién eres y qué vendes -->
+            <div class="preferences-bloque preferences-bloque-demografico">
+                <h3 class="preferences-bloque-titulo">Sobre tu empresa y tu producto</h3>
+                <p class="preferences-bloque-intro">Estos datos describen qui&eacute;n eres y qu&eacute; vendes. No definen el perfil: solo encuadran el an&aacute;lisis.</p>
+
+                <div class="preferences-grid">
+                    <div class="preference-form">
+                        <h3>¿Qué producto industrial quieres exportar?</h3>
+                        <form>
+                            <div class="form-group">
+                                <input type="text" placeholder="Indica su CNAE a 4 dígitos" class="form-control" id="cnae-input"
+                                       list="cnae-lista" autocomplete="off"
+                                       aria-describedby="cnae-ayuda">
+                                <datalist id="cnae-lista"></datalist>
+                                <p class="privacy-note" id="cnae-ayuda" style="margin-top:8px;">Escribe el código o elige el producto de la lista</p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- El bloque "Nivel geografico" se elimino a peticion: las
+                         zonas del mapa ya cubren el ambito (Europa, America,
+                         Asia, Oriente Proximo, Africa, Resto del Mundo) y la
+                         seleccion no se leia en ningun sitio, porque
+                         zonaSeleccionada tiene su propio control mas abajo. -->
+                </div>
+            </div>
+
+            <!-- Cuestionario FMFS -->
+            <div class="questionnaire-section">
+                <h3>Cuestionario de capacidad de exportar<sup class="info-sup"><button type="button" class="info-badge info-badge-oscuro" data-info-for="info-literatura" aria-expanded="false" aria-controls="info-popup" aria-label="Fundamento acad&eacute;mico del cuestionario">i</button></sup></h3>
+                <p class="section-intro">22 preguntas en 6 bloques para evaluar tu capacidad para exportar</p>
+
+                <!-- Contenido que solo se ve dentro del panel al pulsar la "i" -->
+                <div id="info-literatura" hidden>
+                    <p>Construido a partir de literatura acad&eacute;mica sobre <em>export readiness</em>, capacidades de internacionalizaci&oacute;n y desempe&ntilde;o exportador (por ejemplo, Gerschewski et al., 2020).</p>
+                    <p class="info-referencia"><strong>Fuente:</strong> Gerschewski, S., Scott-Kennel, J., &amp; Rose, E. L. (2020). &ldquo;Ready to export? The role of export readiness for superior export performance of small and medium-sized enterprises&rdquo;. <em>The World Economy</em>, 43(5), 1253&ndash;1276. <a href="https://doi.org/10.1111/twec.12928" target="_blank" rel="noopener">https://doi.org/10.1111/twec.12928</a></p>
+                </div>
+
+                <div class="questionnaire-grid">
+                    <!-- Bloque 1 -->
+                    <div class="question-block">
+                        <h4>Bloque 1 — Encaje producto-Mercado</h4>
+                        <div class="question">
+                            <p><strong>P1.</strong> ¿Qué grado de diferenciación presenta el producto respecto a las alternativas disponibles?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Sin diferenciación</option>
+                                <option value="40">Baja diferenciación</option>
+                                <option value="60">Diferenciación media</option>
+                                <option value="80">Alta diferenciación</option>
+                                <option value="100">Diferenciación única</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P2.</strong> ¿Cuál es la competitividad del precio? (Precio previsto / precio de productos comparables)</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Más de 20% por encima</option>
+                                <option value="40">10-20% por encima</option>
+                                <option value="60">Similar</option>
+                                <option value="80">10-20% por debajo</option>
+                                <option value="100">Más de 20% por debajo</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P3.</strong> ¿Ha comercializado anteriormente productos iguales o similares?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Nunca</option>
+                                <option value="40">Hace más de 5 años</option>
+                                <option value="60">En los últimos 5 años</option>
+                                <option value="80">En los últimos 2 años</option>
+                                <option value="100">Actualmente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 2 -->
+                    <div class="question-block">
+                        <h4>Bloque 2 — Capacidad de adaptación</h4>
+                        <div class="question">
+                            <p><strong>P4.</strong> ¿Qué grado de modificación técnica necesita el producto?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Rediseño completo</option>
+                                <option value="40">Modificaciones mayores</option>
+                                <option value="60">Modificaciones menores</option>
+                                <option value="80">Ajustes mínimos</option>
+                                <option value="100">Ninguna modificación</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P5.</strong> ¿Dispone de las certificaciones/homologaciones necesarias?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="0">No (KO)</option>
+                                <option value="20">Muy lejos de obtenerlas</option>
+                                <option value="40">En proceso avanzado</option>
+                                <option value="60">Parcialmente obtenidas</option>
+                                <option value="80">Casi todas</option>
+                                <option value="100">Todas obtenidas</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P6.</strong> ¿Cuál es el coste de adaptación respecto a tus recursos financieros disponibles?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Más del 100%</option>
+                                <option value="40">50-100%</option>
+                                <option value="60">25-50%</option>
+                                <option value="80">10-25%</option>
+                                <option value="100">Menos del 10%</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P7.</strong> ¿Capacidad de personalización del producto?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Muy limitada</option>
+                                <option value="60">Limitada</option>
+                                <option value="80">Buena</option>
+                                <option value="100">Total</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 3 -->
+                    <div class="question-block">
+                        <h4>Bloque 3 — Recursos financieros</h4>
+                        <div class="question">
+                            <p><strong>P8.</strong> ¿Qué presupuesto disponible tienes respecto al coste estimado de entrada?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Menos del 50%</option>
+                                <option value="40">50-75%</option>
+                                <option value="60">75-100%</option>
+                                <option value="80">100-150%</option>
+                                <option value="100">Más del 150%</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P9.</strong> ¿Qué esfuerzo financiero supone entrar y consolidarse en el mercado (24 meses)?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Más del 100% recursos</option>
+                                <option value="40">50-100% recursos</option>
+                                <option value="60">25-50% recursos</option>
+                                <option value="80">10-25% recursos</option>
+                                <option value="100">Menos del 10%</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P10.</strong> ¿Cuántos meses puede mantener la actividad sin alcanzar el punto de equilibrio?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="0">Menos de 3 meses</option>
+                                <option value="20">3-6 meses</option>
+                                <option value="40">6-9 meses</option>
+                                <option value="60">9-12 meses</option>
+                                <option value="80">12-18 meses</option>
+                                <option value="100">Más de 18 meses</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P11.</strong> ¿Capacidad de obtener financiación adicional?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Muy difícil</option>
+                                <option value="60">Difícil</option>
+                                <option value="80">Fácil</option>
+                                <option value="100">Muy fácil</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 4 -->
+                    <div class="question-block">
+                        <h4>Bloque 4 — Capacidad comercial y distribución</h4>
+                        <div class="question">
+                            <p><strong>P12.</strong> ¿Canal de distribución establecido?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="0">Ninguno</option>
+                                <option value="25">Identificado</option>
+                                <option value="50">Contactos iniciales</option>
+                                <option value="75">Negociaciones avanzadas</option>
+                                <option value="100">Acuerdo firmado</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P13.</strong> ¿Socios locales?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="0">Ninguno</option>
+                                <option value="25">Identificados</option>
+                                <option value="50">Contactos</option>
+                                <option value="75">Negociaciones</option>
+                                <option value="100">Partner operativo</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P14.</strong> ¿Dispone de personal comercial suficiente?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguno</option>
+                                <option value="40">Insuficiente</option>
+                                <option value="60">Justo</option>
+                                <option value="80">Suficiente</option>
+                                <option value="100">Equipo completo</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P15.</strong> ¿Capacidad de servicio posventa?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Muy limitada</option>
+                                <option value="60">Básica</option>
+                                <option value="80">Buena</option>
+                                <option value="100">Excelente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 5 -->
+                    <div class="question-block">
+                        <h4>Bloque 5 — Experiencia internacional</h4>
+                        <div class="question">
+                            <p><strong>P16.</strong> ¿Experiencia exportadora?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Sin experiencia</option>
+                                <option value="40">Menos de 2 años</option>
+                                <option value="60">2-5 años</option>
+                                <option value="80">5-10 años</option>
+                                <option value="100">Más de 10 años</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P17.</strong> ¿Experiencia en mercados similares?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Mercados diferentes</option>
+                                <option value="60">Algunos similares</option>
+                                <option value="80">Varios similares</option>
+                                <option value="100">Muy similares</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P18.</strong> ¿Relaciones internacionales sostenibles?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Pocas</option>
+                                <option value="60">Algunas</option>
+                                <option value="80">Varias</option>
+                                <option value="100">Muchas y duraderas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 6 -->
+                    <div class="question-block">
+                        <h4>Bloque 6 — Capacidad operativa y cumplimiento</h4>
+                        <div class="question">
+                            <p><strong>P19.</strong> Si las ventas aumentaran un 30%, ¿podría atenderlas?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">No</option>
+                                <option value="40">Con dificultad</option>
+                                <option value="60">Justo</option>
+                                <option value="80">Sí, con ajustes</option>
+                                <option value="100">Sí, sin problema</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P20.</strong> ¿Plazos de entrega competitivos?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Muy lentos</option>
+                                <option value="40">Lentos</option>
+                                <option value="60">Aceptables</option>
+                                <option value="80">Buenos</option>
+                                <option value="100">Excelentes</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P21.</strong> ¿Calidad y documentación del producto?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Insuficiente</option>
+                                <option value="40">Básica</option>
+                                <option value="60">Aceptable</option>
+                                <option value="80">Buena</option>
+                                <option value="100">Certificada</option>
+                            </select>
+                        </div>
+                        <div class="question">
+                            <p><strong>P22.</strong> ¿Gestión de incidencias?</p>
+                            <select class="form-control">
+                                <option value="">Seleccionar...</option>
+                                <option value="20">Ninguna</option>
+                                <option value="40">Reactiva</option>
+                                <option value="60">Básica</option>
+                                <option value="80">Proactiva</option>
+                                <option value="100">Excelente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="questionnaire-actions">
+                    <button class="btn btn-primary btn-large" onclick="calcularYRegistrarFMFS()">Calcular capacidad de exportar</button>
+                    <div id="fmfs-result" class="fmfs-result"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mi cuenta: se abre desde el menu y muestra un panel de los tres -->
+    <section class="section mi-cuenta requiere-sesion oculto" id="mi-cuenta">
+        <div class="container">
+            <div class="section-header">
+                <h2>Mi cuenta</h2>
+                <p class="section-intro" id="mi-cuenta-intro">Elige qu&eacute; quieres consultar</p>
+            </div>
+
+            <!-- Panel 1: actividad pasada -->
+            <div class="cuenta-panel" data-panel="actividad" hidden>
+                <div class="yo-grid">
+                    <div class="yo-ficha">
+                        <h3>Tus datos</h3>
+                        <dl class="yo-datos" id="yo-datos"></dl>
+                    </div>
+
+                    <div class="yo-actividad">
+                        <h3>Actividad pasada</h3>
+                        <div class="yo-actividad-vacia" id="yo-vacio">
+                            <p>A&uacute;n no hay actividad registrada.</p>
+                            <p class="yo-vacio-pista">Cuando uses el mapa, el cuestionario o la probabilidad de &eacute;xito exportador, cada an&aacute;lisis quedar&aacute; guardado aqu&iacute;.</p>
+                            <a href="#servicios" class="btn btn-primary">Empezar a usar GEM</a>
+                        </div>
+                        <ul class="yo-lista" id="yo-lista"></ul>
+                        <div class="yo-acciones">
+                            <button type="button" class="btn btn-outline" id="yo-exportar">Descargar mi actividad</button>
+                            <button type="button" class="btn btn-disabled btn-cerrar-cuenta" id="yo-borrar-actividad">Borrar actividad</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: suscripciones y pago -->
+            <div class="cuenta-panel" data-panel="suscripciones" hidden>
+                <div class="cuenta-panel-caja">
+                    <h3>Suscripciones y pago</h3>
+                    <div class="suscripcion-fila">
+                        <div class="suscripcion-info">
+                            <p class="suscripcion-nombre">Servicio Exporta</p>
+                            <p class="suscripcion-detalle">17 criterios de an&aacute;lisis, mapa interactivo, informes PDF y cuestionario de capacidad exportadora</p>
+                        </div>
+                        <p class="suscripcion-precio">50€<span>/mes</span></p>
+                        <span class="suscripcion-estado">Plan actual</span>
+                    </div>
+                    <div class="suscripcion-fila">
+                        <div class="suscripcion-info">
+                            <p class="suscripcion-nombre">Servicio Extra &Uacute;nete</p>
+                            <p class="suscripcion-detalle">Red de empresas que exportan a tus mismos mercados</p>
+                        </div>
+                        <p class="suscripcion-precio">+10€<span>/mes</span></p>
+                        <span class="suscripcion-estado suscripcion-estado-inactivo">No contratado</span>
+                    </div>
+                    <div class="suscripcion-fila">
+                        <div class="suscripcion-info">
+                            <p class="suscripcion-nombre">Servicio Extra Decisi&oacute;n</p>
+                            <p class="suscripcion-detalle">Prioridad de entrada a mercados, estrategias de entrada y simulaci&oacute;n de escenarios</p>
+                        </div>
+                        <p class="suscripcion-precio">+30€<span>/mes</span></p>
+                        <span class="suscripcion-estado suscripcion-estado-inactivo">No contratado</span>
+                    </div>
+                    <p class="cuenta-panel-nota">El pago se har&aacute; fuera de esta web. Ponte en contacto con nosotros para cambiar o dar de alta un servicio.</p>
+                    <div class="cuenta-panel-acciones">
+                        <a href="#contacto" class="btn btn-primary">Contactar para cambiar mi plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: cerrar sesion -->
+            <div class="cuenta-panel" data-panel="sesion" hidden>
+                <div class="cuenta-panel-caja">
+                    <h3>Cerrar sesi&oacute;n</h3>
+                    <p class="cuenta-panel-texto">Se cerrar&aacute; la sesi&oacute;n en este navegador. Tu actividad guardada se conservar&aacute; y volver&aacute;s a verla al entrar de nuevo con la misma cuenta.</p>
+                    <div class="cuenta-panel-acciones">
+                        <button type="button" class="btn btn-primary" id="cuenta-cerrar-sesion">Cerrar sesi&oacute;n</button>
+                        <button type="button" class="btn btn-outline" data-cuenta-panel="actividad">Volver a mi actividad</button>
+                    </div>
+                    <div class="cuenta-panel-separador"></div>
+                    <h3>Borrar mi cuenta</h3>
+                    <p class="cuenta-panel-texto">Adem&aacute;s de cerrar la sesi&oacute;n, se borra de este navegador la actividad guardada y los datos de la cuenta. No se puede deshacer.</p>
+                    <div class="cuenta-panel-acciones">
+                        <button type="button" class="btn btn-peligro" id="cuenta-borrar-todo">Cerrar sesi&oacute;n y borrar mi cuenta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mapa Interactivo -->
+    <section class="section mapa-interactivo requiere-sesion" id="mapa">
+        <div class="container">
+            <div class="section-header">
+                <h2>Atractivo de los mercados de exportación para ti</h2>
+                <p class="mapa-enlace-titulo"><a href="#mapa">Mapa de mercados</a></p>
+                <p class="section-intro">Pasa el cursor sobre un pa&iacute;s para ver su atractivo del mercado ajustado por tu perfil y capacidad exportadora<sup class="info-sup"><button type="button" class="info-badge" data-info-for="info-atractivo" aria-expanded="false" aria-controls="info-popup" aria-label="C&oacute;mo se construye el Atractivo del mercado ajustado por tu perfil y capacidad exportadora">i</button></sup> y descargar el informe justificativo</p>
+            </div>
+
+            <div class="mapa-container">
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="color-box veryHigh"></span>
+                        <span><strong>Verde intenso:</strong> atractivo muy alto (90-100)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box high"></span>
+                        <span><strong>Verde claro:</strong> atractivo alto (80-90)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box midHigh"></span>
+                        <span><strong>Naranja intenso:</strong> atractivo medio-alto (70-80)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box mid"></span>
+                        <span><strong>Naranja claro:</strong> atractivo medio (60-70)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box low"></span>
+                        <span><strong>Rojo claro:</strong> atractivo bajo (40-60)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box veryLow"></span>
+                        <span><strong>Rojo intenso:</strong> atractivo muy bajo (0-40)</span>
+                    </div>
+                </div>
+
+                <div id="map"></div>
+
+                <!-- Contenido que solo se ve dentro del panel al pulsar la "i".
+                     Se mantiene aqui, y no en la pagina, para que el texto
+                     no este duplicado en dos sitios. -->
+                <div id="info-atractivo" hidden>
+                    <p><strong>C&oacute;mo se han determinado los pesos de los criterios</strong></p>
+                    <p>El peso de los criterios seg&uacute;n cada perfil se ha determinado de forma h&iacute;brida, combinando tres fuentes: la opini&oacute;n de varios expertos y empresarios consultados, las consultas realizadas a una herramienta de inteligencia artificial generativa (ChatGPT, versi&oacute;n 5.6&nbsp;Luna) y, en &uacute;ltimo lugar, la experiencia y los conocimientos del autor como t&eacute;cnico de Comercio Exterior y profesor universitario durante m&aacute;s de veinte a&ntilde;os.</p>
+                    <p class="info-separador"></p>
+                    <p><strong>C&oacute;mo se construye el Atractivo del mercado ajustado por tu perfil y capacidad exportadora</strong></p>
+                    <ul>
+                        <li><strong>Capacidad de exportar</strong> &mdash; lo que tu empresa puede hacer. Se obtiene de tus 22 respuestas al cuestionario, agrupadas en seis bloques (Encaje producto-Mercado, Adaptaci&oacute;n, Finanzas, Comercial, Experiencia y Operaciones).</li>
+                        <li><strong>Atractivo del mercado</strong> &mdash; lo que ofrece el pa&iacute;s. Se calcula con 17 criterios agrupados en 7 dimensiones: entorno regulatorio y comercial, coste de acceso y log&iacute;stica, demanda y competencia, entorno econ&oacute;mico, marco institucional, apoyo institucional y vulnerabilidad del mercado.</li>
+                    </ul>
+                    <p class="map-info-fuentes">Todos los indicadores que alimentan el atractivo del mercado proceden &uacute;nicamente de fuentes oficiales, contrastadas y de reconocido prestigio: organismos internacionales como el Banco Mundial, la OCDE, la Organizaci&oacute;n Mundial del Comercio, el Fondo Monetario Internacional o el Foro Econ&oacute;mico Mundial, e instituciones nacionales como el ICEX y las C&aacute;maras de Comercio. Cada criterio queda justificado en el informe con la referencia concreta de la fuente utilizada.</p>
+                    <p>Si a&uacute;n no has respondido el cuestionario, el mapa muestra solo el atractivo del mercado.</p>
+                    <h4>El peso de cada criterio importa</h4>
+                    <p>La ponderaci&oacute;n de cada criterio var&iacute;a seg&uacute;n la combinaci&oacute;n de tu producto, orientaci&oacute;n al riesgo y nivel de recursos. As&iacute;, una peque&ntilde;a empresa conservadora recibir&aacute; recomendaciones muy diferentes a una gran empresa con alto apetito de riesgo, incluso para el mismo producto. Esta personalizaci&oacute;n es clave para maximizar tu rentabilidad exportadora.</p>
+                </div>
+            </div>
+
+            <!-- Tres mercados mejor puntuados -->
+            <div class="top-markets" id="top-markets">
+                <h3>Los 3 mercados con mayor atractivo del mercado ajustado por tu perfil y capacidad exportadora</h3>
+                <p class="top-markets-intro" id="top-markets-intro"></p>
+                <div class="zonas-box">
+                    <p class="zonas-titulo">Zona geográfica</p>
+                    <div class="zonas-lista" id="zonas-lista" role="group" aria-label="Selecciona una zona geográfica">
+                        <button type="button" class="zona-btn" data-zona="todas" aria-pressed="false">Todos</button>
+                        <button type="button" class="zona-btn" data-zona="europa" aria-pressed="false">Europa</button>
+                        <button type="button" class="zona-btn" data-zona="america">América</button>
+                        <button type="button" class="zona-btn" data-zona="asia">Asia</button>
+                        <button type="button" class="zona-btn" data-zona="orienteProximo" aria-pressed="false">Oriente Próximo</button>
+                        <button type="button" class="zona-btn" data-zona="africa" aria-pressed="false">África</button>
+                        <button type="button" class="zona-btn" data-zona="restoMundo" aria-pressed="false">Resto del Mundo</button>
+                    </div>
+                </div>
+                <div class="top-markets-grid" id="top-markets-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Probabilidad de éxito exportador en un mercado concreto -->
+    <section class="section prob-exito requiere-sesion" id="prob-exito">
+        <div class="container">
+            <div class="section-header">
+                <h2>Probabilidad de éxito exportador<sup class="info-sup"><button type="button" class="info-badge" data-info-for="info-exito-exportador" aria-expanded="false" aria-controls="info-popup" aria-label="Qu&eacute; entendemos por &eacute;xito exportador">i</button></sup> en un mercado concreto</h2>
+                <p class="section-intro">Si quieres saber tu probabilidad de éxito en un mercado concreto, sigue los siguientes dos pasos</p>
+            </div>
+
+            <div class="prob-pasos">
+                <p class="prob-paso"><span class="prob-num">1</span> Selecciona un mercado de exportación concreto</p>
+                <div class="prob-select">
+                    <label for="prob-pais">Mercado</label>
+                    <select id="prob-pais" class="form-control"></select>
+                </div>
+
+                <p class="prob-paso"><span class="prob-num">2</span> Contesta a las siguientes tres preguntas</p>
+                <div class="prob-preguntas" id="prob-preguntas"></div>
+            </div>
+
+            <div class="prob-resultado" id="prob-resultado"></div>
+
+            <!-- Contenido que solo se ve dentro del panel al pulsar la "i" -->
+            <div id="info-exito-exportador" hidden>
+                <p>GEM considera que una empresa alcanza el éxito exportador cuando desarrolla ventas de exportación sostenibles y rentables durante al menos tres años. Este criterio propio se apoya en los indicadores que publica el Banco Mundial.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agradecimientos -->
+    <section class="section agradecimientos" id="agradecimientos">
+        <div class="container">
+            <p class="agradecimientos-titulo">Agradecimientos:</p>
+            <div class="agradecimientos-grid">
+                <div class="agradecimiento">
+                    <img src="assets/logos/otri-umu.jpg" alt="OTRI - Universidad de Murcia">
+                </div>
+                <div class="agradecimiento">
+                    <img src="assets/logos/umu-aprende.jpg" alt="umu aprende">
+                </div>
+                <div class="agradecimiento">
+                    <img src="assets/logos/singularway.jpg" alt="Singular way - Estrategia y Marketing">
+                </div>
+                <div class="agradecimiento">
+                    <img src="assets/logos/oir-o2a.jpg" alt="Consulting O.I.R y O2A">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section class="section contacto" id="contacto">
+        <div class="container">
+            <div class="section-header">
+                <h2>¿Listo para expandir exitosamente tu negocio?</h2>
+                <p class="section-intro">Contáctanos para descubrir cómo GEM puede ayudarte a encontrar los mejores mercados para tu empresa</p>
+            </div>
+            
+            <div class="contact-grid">
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <label for="nombre">Nombre completo</label>
+                            <input type="text" id="nombre" class="form-control" placeholder="Tu nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" placeholder="tu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje</label>
+                            <textarea id="mensaje" class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Enviar mensaje</button>
+                    </form>
+                </div>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <h4>Email</h4>
+                        <p>Escríbenos directamente</p>
+                        <a href="mailto:info@globalexportmarket.com" class="contact-link">info@globalexportmarket.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <h4>Consultas</h4>
+                        <p>¿Tienes preguntas sobre nuestros servicios? Estamos aquí para ayudarte a encontrar el mejor mercado para tu empresa.</p>
+                    </div>
+                    <div class="contact-item">
+                        <h4>Prueba gratuita</h4>
+                        <p>Solicita una demostración personalizada de la plataforma GEM</p>
+                        <a href="#" class="btn btn-outline">Solicitar demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 2L35 15L20 38L5 15L20 2Z" fill="currentColor"/>
+                            <path d="M20 8L28 15L20 32L12 15L20 8Z" fill="white" opacity="0.3"/>
+                            <path d="M20 2L28 15H12L20 2Z" fill="white" opacity="0.5"/>
+                        </svg>
+                        GEM
+                    </a>
+                    <p>Tu aliado estratégico para identificar los mejores mercados de exportación mediante inteligencia artificial y análisis personalizado.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Servicios</h4>
+                        <ul>
+                            <li><a href="#servicios">Servicio Exporta</a></li>
+                            <li><a href="#servicios">Servicio Únete</a></li>
+                            <li><a href="#servicios">Consultoría</a></li>
+                            <li><a href="#servicios">Grandes Oportunidades</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Empresa</h4>
+                        <ul>
+                            <li><a href="#mapa">Atractivo de los mercados</a></li>
+                            <li><a href="#contacto">Contacto</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Global Export Market. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Emerger de informacion: la "i" recuadrada abre este panel -->
+    <div class="info-overlay" id="info-overlay" hidden>
+        <div class="info-popup" id="info-popup" role="dialog" aria-modal="true" aria-labelledby="info-popup-title">
+            <button type="button" class="info-popup-cerrar" id="info-popup-cerrar" aria-label="Cerrar informaci&oacute;n">&times;</button>
+            <div class="info-popup-cuerpo" id="info-popup-cuerpo"></div>
+        </div>
+    </div>
+
+       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js?v=100"></script>
+    <script src="perplexity-integration.js?v=1" defer></script>
+</body>
+</html>
